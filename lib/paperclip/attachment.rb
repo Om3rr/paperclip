@@ -416,9 +416,10 @@ module Paperclip
     end
 
     def initialize_storage #:nodoc:
-      storage_class_name = @options[:storage].to_s.downcase.camelize
+      storage = @options[:storage]
       begin
-        storage_module = Paperclip::Storage.const_get(storage_class_name)
+        storage = storage.call(instance) if storage.respond_to?(:call)
+        storage_module = Paperclip::Storage.const_get(storage.to_s.camelize)
       rescue NameError
         raise Errors::StorageMethodNotFound, "Cannot load storage module '#{storage_class_name}'"
       end
